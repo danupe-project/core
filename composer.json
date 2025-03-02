@@ -1,0 +1,16 @@
+{
+    "name": "danupe/core",
+    "description": "The Core-System",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Danupe\\Core\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+
+}
