@@ -1,0 +1,5 @@
+<?php
+
+return [
+    'testkey' => 'testvalue'
+];
