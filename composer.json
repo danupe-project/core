@@ -2,15 +2,22 @@
     "name": "danupe/core",
     "description": "The Core-System",
     "type": "library",
+    "require": {
+        "php": ">=8.0",
+        "slim/slim": "4.*",
+        "slim/psr7": "1.*"
+    },
     "autoload": {
         "psr-4": {
-            "Danupe\\Core\\": "src/"
+            "Danupe\\Core\\": "src/",
+            "Danupe\\Core\\Classes\\": "src/classes/"
+        },
+        "autoload-dev": {
+        "psr-4": {
+            "Danube\\Core\\Tests\\": "tests/"
         }
-    },
-    "require": {
-        "php": ">=8.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
-
+    }
 }
