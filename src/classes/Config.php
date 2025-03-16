@@ -1,6 +1,6 @@
 <?php
 
-namespace Danube\Core\Classes;
+namespace Danupe\Core\Classes;
 
 class Config
 {

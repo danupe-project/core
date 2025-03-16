@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Danube\Core\Test\Classes;
+namespace Danupe\Core\Test\Classes;
 
-use Danube\Core\Classes\Env;
-use Danube\Core\Classes\Path;
-use Danube\Core\TestCase;
+use Danupe\Core\Classes\Env;
+use Danupe\Core\Classes\Path;
+use Danupe\Core\TestCase;
 
 
 class EnvTest extends TestCase
@@ -20,7 +20,7 @@ class EnvTest extends TestCase
     {
         $path = dirname(__DIR__, 3) . '/tests/files/.env';
         Env::init($path);
-        $this->assertEquals('VALUE!', Env::get('TEST_STRING'));
+        $this->assertEquals('VALUE!', env('TEST_STRING'));
     }
 
     public function testGetArrayValues()
@@ -29,8 +29,8 @@ class EnvTest extends TestCase
         $path = dirname(__DIR__, 3) . '/tests/files/.env';
         Env::init($path);
         $expected = 'value1,value2';
-        $this->assertEquals($expected, Env::get('TEST_ARRAY_1'));
-        $this->assertEquals($expected, Env::get('TEST_ARRAY_2'));
+        $this->assertEquals($expected, env('TEST_ARRAY_1'));
+        $this->assertEquals($expected, env('TEST_ARRAY_2'));
     }
 
     public function testGetArray()
@@ -38,9 +38,9 @@ class EnvTest extends TestCase
         $path = dirname(__DIR__, 3) . '/tests/files/.env';
         Env::init($path);
         $expected = ['value1', 'value2'];
-        $this->assertEquals($expected, Env::getArray('TEST_ARRAY_1'));
-        $this->assertEquals($expected, Env::getArray('TEST_ARRAY_2'));
-        $this->assertEquals($expected, Env::getArray('TEST_ARRAY_3'));
+        $this->assertEquals($expected, envArray('TEST_ARRAY_1'));
+        $this->assertEquals($expected, envArray('TEST_ARRAY_2'));
+        $this->assertEquals($expected, envArray('TEST_ARRAY_3'));
     }
 
 

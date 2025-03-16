@@ -1,9 +1,9 @@
 <?php
 
-namespace Danube\Core\Test\Classes\PathTest;
+namespace Danupe\Core\Test\Classes\PathTest;
 
-use Danube\Core\Classes\Path;
-use PHPUnit\Framework\TestCase;
+use Danupe\Core\Classes\Path;
+use Danupe\Core\TestCase;
 class PathTest extends TestCase
 {
     public function testBase()

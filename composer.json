@@ -14,7 +14,7 @@
         },
         "autoload-dev": {
         "psr-4": {
-            "Danube\\Core\\Tests\\": "tests/"
+            "Danupe\\Core\\Tests\\": "tests/"
         }
     },
     "minimum-stability": "dev",

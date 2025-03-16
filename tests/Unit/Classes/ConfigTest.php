@@ -1,8 +1,8 @@
 <?php
 
-use Danube\Core\Classes\Path;
-use PHPUnit\Framework\TestCase;
-use Danube\Core\Classes\Config;
+use Danupe\Core\Classes\Path;
+use Danupe\Core\TestCase;
+use Danupe\Core\Classes\Config;
 class ConfigTest extends TestCase
 {
 

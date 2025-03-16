@@ -1,6 +1,6 @@
 <?php
 
-namespace Danube\Core;
+namespace Danupe\Core;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 class TestCase extends PHPUnitTestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace Danube\Core\Classes;
+namespace Danupe\Core\Classes;
 
 class Path
 {
@@ -21,7 +21,7 @@ class Path
 
     public static function plugin(string $pluginName)
     {
-        foreach (Env::getArray('DANUPE_PLUGINS') as $plugin) {
+        foreach (envArray('DANUPE_PLUGINS') as $plugin) {
             $pluginNameFromArray = explode('/', $plugin);
             $pluginNameFromArray = $pluginNameFromArray[count($pluginNameFromArray) - 1] ?? null;
             if ($pluginName === $pluginNameFromArray) {
@@ -32,7 +32,7 @@ class Path
     }
 
     public static function plugins(){
-        return Env::getArray('DANUPE_PLUGINS');
+        return envArray('DANUPE_PLUGINS');
     }
 
     public static function getPluginNameFromPath(string $path)
