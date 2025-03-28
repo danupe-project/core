@@ -4,18 +4,28 @@ namespace Danupe\Core\Classes;
 
 class Session
 {
-    private array $data = [];
+    private array|null $data = [];
     private array $errors = [];
 
     public function __construct()
     {
-        #session_start();
         $this->data = &$_SESSION;
+    }
+
+    public function start()
+    {
+        session_start();
+    }
+
+    public function setCsrf()
+    {
+        $this->set('csrf_token', bin2hex(random_bytes(32)));
     }
 
     public function set(string $key, $value): void
     {
         $this->data[$key] = $value;
+        $_SESSION[$key] = $value;
     }
 
     public function get(string $key, $default = null)
