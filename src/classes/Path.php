@@ -21,7 +21,7 @@ class Path
 
     public static function plugin(string $pluginName)
     {
-        foreach (envArray('DANUPE_PLUGINS') as $plugin) {
+        foreach (danupe()->env()->getArray('DANUPE_PLUGINS') as $plugin) {
             $pluginNameFromArray = explode('/', $plugin);
             $pluginNameFromArray = $pluginNameFromArray[count($pluginNameFromArray) - 1] ?? null;
             if ($pluginName === $pluginNameFromArray) {
@@ -32,12 +32,19 @@ class Path
     }
 
     public static function plugins(){
-        return envArray('DANUPE_PLUGINS');
+        return danupe()->env()->getArray('DANUPE_PLUGINS');
     }
 
     public static function getPluginNameFromPath(string $path)
     {
         $pluginName = explode('/', $path);
         return $pluginName[count($pluginName) - 1] ?? null;
+    }
+
+    public static function getAllFiles(string $path)
+    {
+        $files = glob($path . '/*');
+        $files = array_filter($files, fn($file) => is_file($file));
+        return $files;
     }
 }
