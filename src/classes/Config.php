@@ -13,24 +13,23 @@ class Config
 
     private function loadConfigs(string|array $path): void
     {
-        $allPlugins = Path::plugins();
+        $allPlugins = danupe()->path()->plugins();
         if ($path !== '') {
             $allPlugins = is_array($path) ? $path : [$path];
         }
 
         foreach ($allPlugins as $path) {
-            $configDirectory = Path::base().$path . '/src/config';
+            $configDirectory = danupe()->path()->base() . $path . '/src/config';
             if (is_dir($configDirectory)) {
                 $configFiles = glob($configDirectory . '/*.php');
                 foreach ($configFiles as $file) {
                     if (file_exists($file)) {
-                        $pluginName = Path::getPluginNameFromPath($path);
+                        $pluginName = danupe()->path()->getPluginNameFromPath($path);
                         $this->mergeConfig($file, $pluginName);
                     }
                 }
             }
         }
-        
     }
 
     private function mergeConfig(string $file, string $namespace)
@@ -69,5 +68,38 @@ class Config
     public function set(string $key, $value)
     {
         $this->config[$key] = $value;
+    }
+
+
+    public function getRoutes()
+    {
+        $routes = [];
+        foreach (['guest', 'user', 'admin'] as $group) {
+
+            foreach ($this->getAllByKey('routes') as $config) {
+                if (danupe()->data()->get($config, $group)) {
+                    $routes[$group] = danupe()->data()->get($config, $group);
+                }
+            }
+        }
+
+        return $routes;
+    }
+
+    public function getAllByKey(string $key = 'routes', $asOneDimensionalArray = false)
+    {
+
+        $configData = [];
+        foreach ($this->config as $config) {
+            if (danupe()->data()->get($config, $key)) {
+                $configData[] = danupe()->data()->get($config, $key);
+            }
+        }
+
+        if($asOneDimensionalArray){
+            $configData = array_merge(...$configData);
+        }
+
+        return $configData;
     }
 }
