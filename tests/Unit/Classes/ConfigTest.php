@@ -8,9 +8,9 @@ class ConfigTest extends TestCase
 
     public function testGetConfig()
     {
-        $config = new Config(Path::plugin('core').'/tests/files');
+        $config = new Config(danupe()->path()->plugin('core').'/tests/files');
         $this->assertIsArray($config->all());
-        $this->assertEquals('testvalue', $config->get('files.testkey'));
+        $this->assertEquals(['testvalue','testvalue2'], $config->get('files.testkey'));
     }
     public function testSetConfig()
     {
@@ -18,5 +18,23 @@ class ConfigTest extends TestCase
         $config->set('test', 'test');
         $this->assertEquals('test', $config->get('test'));
     }
+
+    public function testGetAllByKey(){
+        $config = new Config(danupe()->path()->plugin('core').'/tests/files');
+        $result = $config->getAllByKey('more');
+        $result = danupe()->data()->get($result,'0');
+        $this->assertIsArray($result);
+        $this->assertCount(2, danupe()->data()->get($result,'testkey'));
+
+    }
+
+
+public function testGetRoutes(){
+    $config = new Config(danupe()->path()->plugin('core').'/tests/files');
+    $result = $config->getRoutes();
+    $this->assertIsArray($result['guest']);
+    $this->assertCount(2, $result['guest']['GET']);
+    $this->assertCount(1, $result['guest']['POST']);
+}
 
 }

@@ -8,27 +8,27 @@ class PathTest extends TestCase
 {
     public function testBase()
     {
-        $base = Path::base();
+        $base = danupe()->path()->base();
         //todo: find better common solution
         $this->assertEquals(dirname(__DIR__, 6), $base);
     }
 
     public function testPlugin()
     {
-        $package = Path::plugin('core');
+        $package = danupe()->path()->plugin('core');
         $this->assertEquals('/development/danupe/core', $package);
     }
 
     public function testPlugins()
     {
-        $plugins = Path::plugins();
+        $plugins = danupe()->path()->plugins();
         $this->assertIsArray($plugins);
         $this->assertContains('/development/danupe/core', $plugins);
     }
 
     public function testGetPluginNameFromPath()
     {
-        $pluginName = Path::getPluginNameFromPath('/development/danupe/core');
+        $pluginName = danupe()->path()->getPluginNameFromPath('/development/danupe/core');
         $this->assertEquals('core', $pluginName);
     }
 }
