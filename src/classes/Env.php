@@ -13,7 +13,7 @@ class Env
     public static function init(string $path = ''): void
     {
         if ($path === '') {
-            $path = Path::base() . '/.env';
+            $path = danupe()->path()->base() . '/.env';
         }
         if (!file_exists($path)) {
             throw new \RuntimeException("Env file not found: $path");
