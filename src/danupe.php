@@ -1,9 +1,7 @@
 <?php
-require __DIR__.'/helper.php';
 require dirname(__DIR__, 4). '/vendor/autoload.php';
-
-danupe()->session()->start();
-
+session_start();
+require __DIR__.'/helper.php';
 danupe()->session()->setCsrf();
 
 use Slim\Factory\AppFactory;
