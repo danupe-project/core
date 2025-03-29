@@ -4,96 +4,86 @@ namespace Danupe\Core\Classes;
 
 class Danupe
 {
+    private static $instances = [];
 
     public function view()
     {
-        global $viewInstance;
-
-        if ($viewInstance === null) {
-            $viewInstance = new View();
-        }
-        return $viewInstance;
+        return $this->getInstance(View::class);
     }
 
     public function input()
     {
-        global $inputInstance;
-
-        if ($inputInstance === null) {
-            $inputInstance = new Input();
-        }
-        return $inputInstance;
+        return $this->getInstance(Input::class);
     }
 
     public function data()
     {
-        global $dataInstance;
-
-        if ($dataInstance === null) {
-            $dataInstance = new Data();
-        }
-        return $dataInstance;
+        return $this->getInstance(Data::class);
     }
 
     public function config()
     {
-        global $configInstance;
-
-        if ($configInstance === null) {
-            $configInstance = new Config();
-        }
-        return $configInstance;
+        return $this->getInstance(Config::class);
     }
 
     public function env()
     {
-        global $envInstance;
-
-        if ($envInstance === null) {
-            $envInstance = new Env();
-        }
-        return $envInstance;
+        return $this->getInstance(Env::class);
     }
-
 
     public function file()
     {
-        global $fileInstance;
-
-        if ($fileInstance === null) {
-            $fileInstance = new File();
-        }
-        return $fileInstance;
+        return $this->getInstance(File::class);
     }
 
     public function path()
     {
-        global $pathInstance;
-
-        if ($pathInstance === null) {
-            $pathInstance = new Path();
-        }
-        return $pathInstance;
+        return $this->getInstance(Path::class);
     }
 
     public function session()
     {
-        global $sessionInstance;
-
-        if ($sessionInstance === null) {
-            $sessionInstance = new Session();
-        }
-        return $sessionInstance;
+        return $this->getInstance(Session::class);
     }
 
     public function helper()
     {
-        global $helperInstance;
-
-        if ($helperInstance === null) {
-            $helperInstance = new Helper();
-        }
-        return $helperInstance;
+        return $this->getInstance(Helper::class);
     }
 
+    public function route()
+    {
+        return $this->getInstance(Route::class);
+    }
+
+    public function plugin(string $plugin, string $class)
+    {
+        return $this->module('Danupe\\Plugin\\', $plugin, $class);
+    }
+
+    public function project(string $project, string $class)
+    {
+        return $this->module('Danupe\\Project\\', $project, $class);
+    }
+
+    public function module(string $namespace, string $module, string $class)
+    {
+        $moduleName = str_replace(' ', '', ucwords(str_replace('-', ' ', $module)));
+        $className = $namespace . $moduleName . '\\Classes\\' . ucwords($class);
+
+        if (!isset(self::$instances[$module][$className])) {
+            self::$instances[$module][$className] = new $className();
+        }
+
+        return self::$instances[$module][$className];
+    }
+
+    private function getInstance(string $class)
+    {
+        if (!isset(self::$instances[$class])) {
+            self::$instances[$class] = new $class();
+        }
+
+        return self::$instances[$class];
+    }
 }
