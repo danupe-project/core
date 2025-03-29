@@ -14,7 +14,7 @@ class CsrfMiddleware
             $parsedBody = $request->getParsedBody();
             $csrfToken = $parsedBody['csrf_token'] ?? '';
 
-            if (empty($csrfToken) || $csrfToken !== ($_SESSION['csrf_token'] ?? '')) {
+            if (empty($csrfToken) || $csrfToken !== (danupe()->session()->get('csrf_token') ?? '')) {
                 $response = new \Slim\Psr7\Response();
                 $response->getBody()->write("🚫 Ungültiges CSRF-Token.");
                 return $response->withStatus(403);
