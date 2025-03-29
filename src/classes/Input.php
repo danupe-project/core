@@ -27,4 +27,21 @@ class Input
             return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
         }, $input);
     }
+
+    public function has($key)
+    {
+        return isset($_REQUEST[$key]);
+    }
+
+    public function only(array $keys)
+    {
+        $input = $this->all();
+        return array_intersect_key($input, array_flip($keys));
+    }
+
+    public function except(array $keys)
+    {
+        $input = $this->all();
+        return array_diff_key($input, array_flip($keys));
+    }
 }
