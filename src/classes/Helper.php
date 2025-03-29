@@ -4,7 +4,7 @@ namespace Danupe\Core\Classes;
 
 class Helper
 {
-    public static function hello()
+    public function hello()
     {
         return 'Hello World';
     }
