@@ -41,13 +41,10 @@ abstract class Controller
         }
     }
 
-    protected function redirect(string $url, string|array|null $message = null): void
+    protected function redirect(string $url): void
     {
-        if(!empty($message)) {
-            danupe()->session()->set('message', $message);
-        }
         danupe()->session()->set('errors', []);
-        danupe()->session()->set('old', []);
+        danupe()->session()->set('success', []);
         header("Location: {$url}");
         exit;
     }
@@ -66,9 +63,19 @@ abstract class Controller
         exit;
     }
 
-    protected function redirectWithErrors(string $url, array $errors = []): void
+    protected function redirectWithErrors(string $url, string|array $errors = []): void
     {
+        danupe()->session()->set('success', []);
         danupe()->session()->set('errors', $errors);
-        $this->redirect($url);
+        header("Location: {$url}");
+        exit;
+    }
+
+    protected function redirectWithSuccess(string $url, string|array $messages = []): void
+    {
+        danupe()->session()->set('errors', []);
+        danupe()->session()->set('success', $messages);
+        header("Location: {$url}");
+        exit;
     }
 }
