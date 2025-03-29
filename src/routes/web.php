@@ -5,8 +5,11 @@ $systemMiddlewares = danupe()->config()->getAllByKey('middlewares', true);
 
 foreach ($routes as $route => $handler) {
     $method = strtolower($handler['method']);
-    $routeInstance = $app->$method($route, $handler['controller'] . ':' . $handler['action']);
 
+    $parsedRoute = preg_replace('/\/\d+/', '/{id}', $route);
+    $parsedRoute = preg_replace('/\/\{id\}$/', '[/{id}]', $parsedRoute);
+
+    $routeInstance = $app->$method($parsedRoute, $handler['controller'] . ':' . $handler['action']);
     $middlewares = $handler['middlewares'] ?? [];
     if (!empty($middlewares)) {
         foreach ($middlewares as $middlewareClass) {
@@ -18,5 +21,5 @@ foreach ($routes as $route => $handler) {
     }
 
     $routeInstance->add(Danupe\Core\Middlewares\CsrfMiddleware::class);
-
 }
+
