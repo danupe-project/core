@@ -70,22 +70,6 @@ class Config
         $this->config[$key] = $value;
     }
 
-
-    public function getRoutes()
-    {
-        $routes = [];
-        foreach (['guest', 'user', 'admin'] as $group) {
-
-            foreach ($this->getAllByKey('routes') as $config) {
-                if (danupe()->data()->get($config, $group)) {
-                    $routes[$group] = danupe()->data()->get($config, $group);
-                }
-            }
-        }
-
-        return $routes;
-    }
-
     public function getAllByKey(string $key = 'routes', $asOneDimensionalArray = false)
     {
 
