@@ -14,12 +14,16 @@ class Session
 
     public function start()
     {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 
     public function setCsrf()
     {
-        $this->set('csrf_token', bin2hex(random_bytes(32)));
+        if (!$this->get('csrf_token')) {
+            $this->set('csrf_token', bin2hex(random_bytes(32)));
+        }
     }
 
     public function set(string $key, $value): void
@@ -30,7 +34,7 @@ class Session
 
     public function get(string $key, $default = null)
     {
-        return $this->data[$key] ?? $default;
+        return danupe()->data()->get($_SESSION, $key) ?? $default;
     }
 
     public function has(string $key): bool
