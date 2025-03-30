@@ -14,8 +14,12 @@ class AssetController
         $routes = danupe()->route()->getAll();
         $path = $request->getUri()->getPath();
         $routeData = $routes[$path]['path'];
-        if($routes[$path]['type']=="javascript"){
+        if($routes[$path]['type']=="javascript" || $routes[$path]['type']=="js"){
             header('Content-Type: application/javascript');
+            include danupe()->path()->base().$routeData;
+        }
+        if($routes[$path]['type']=="css"){
+            header('Content-Type: text/css');
             include danupe()->path()->base().$routeData;
         }
         exit;
