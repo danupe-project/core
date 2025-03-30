@@ -65,7 +65,7 @@ abstract class Controller
 
     protected function redirectWithErrors(string $url, string|array $errors = []): void
     {
-        danupe()->session()->set('success', []);
+        danupe()->session()->set('success', null);
         danupe()->session()->set('errors', $errors);
         header("Location: {$url}");
         exit;
@@ -73,7 +73,8 @@ abstract class Controller
 
     protected function redirectWithSuccess(string $url, string|array $messages = []): void
     {
-        danupe()->session()->set('errors', []);
+        danupe()->session()->set('old', null);
+        danupe()->session()->set('errors', null);
         danupe()->session()->set('success', $messages);
         header("Location: {$url}");
         exit;
