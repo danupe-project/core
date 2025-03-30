@@ -78,4 +78,11 @@ abstract class Controller
         header("Location: {$url}");
         exit;
     }
+
+    protected function json(array $data): void
+    {
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
 }
