@@ -11,6 +11,11 @@ class Danupe
         return $this->getInstance(View::class);
     }
 
+    public function table()
+    {
+        return $this->getInstance(Table::class);
+    }
+
     public function input()
     {
         return $this->getInstance(Input::class);
