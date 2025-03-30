@@ -9,8 +9,8 @@ foreach ($routes as $route => $handler) {
     $parsedRoute = preg_replace('/\/\d+/', '/{id}', $route);
     $parsedRoute = preg_replace('/\/\{id\}$/', '[/{id}]', $parsedRoute);
 
-    $routeInstance = $app->$method($parsedRoute, $handler['controller'] . ':' . $handler['action']);
-    $middlewares = $handler['middlewares'] ?? [];
+    $routeInstance = $app->$method($parsedRoute, danupe()->data()->get($handler,'controller') . ':' . danupe()->data()->get($handler,'action'));
+    $middlewares = danupe()->data()->get($handler,'middlewares') ?? [];
     if (!empty($middlewares)) {
         foreach ($middlewares as $middlewareClass) {
             $middlewareClass = danupe()->data()->get($systemMiddlewares, $middlewareClass);
