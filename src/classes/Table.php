@@ -59,7 +59,7 @@ class Table
         $headers = array_keys($this->data[0]);
 
         if ($this->links) {
-            $headers[] = "Actions";
+            $headers[] = "actions";
         }
 
 
@@ -78,8 +78,8 @@ class Table
             if ($this->links) {
                 $html .= "<td>";
                 foreach ($this->links as $key => $link) {
-                    $url = $link['url'] . $row[$link['key']];
-                    $html .= "<a href='" . htmlspecialchars($url) . "' class='text-blue-500 hover:text-blue-700'>" . htmlspecialchars($key) . "</a> ";
+                    $url = danupe()->data()->get($link, 'url') . $row[danupe()->data()->get($link, 'key')];
+                    $html .= "<a href='" . htmlspecialchars($url) . "' title='".$key."'><i class='" . danupe()->data()->get($link, 'icon') . "'></i></a> ";
                 }
                 $html .= "</td>";
             }
