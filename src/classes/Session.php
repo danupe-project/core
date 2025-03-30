@@ -39,7 +39,10 @@ class Session
 
     public function has(string $key): bool
     {
-        return isset($this->data[$key]);
+        if(danupe()->data()->get($this->data, $key)){
+            return true;
+        }
+        return false;
     }
 
     public function remove(string $key): void
