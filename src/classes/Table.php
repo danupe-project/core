@@ -53,10 +53,22 @@ class Table
 
     private function buildHtml(): string
     {
+
+        if(empty($this->data)){
+            echo danupe()->view()->render('core', 'components/alert', [
+                'type' => 'warning',
+                'title' => 'Warning',
+                'text' => 'no data found',
+            ]);
+            exit;
+        }
+
+
+
         $html = "<div class='flex w-full overflow-x-auto'>
                 <table class='table'>";
 
-        $headers = array_keys($this->data[0]);
+        $headers = array_keys(danupe()->data()->get($this->data,0,[]));
 
         if ($this->links) {
             $headers[] = "actions";
