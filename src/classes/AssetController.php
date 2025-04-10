@@ -22,6 +22,14 @@ class AssetController
             header('Content-Type: text/css');
             include danupe()->path()->base().$routeData;
         }
+        if($routes[$path]['type']=="font"){
+            header('Content-Type: font/woff2');
+            include danupe()->path()->base().$routeData;
+        }
+        if($routes[$path]['type']=="png"){
+            header('Content-Type: image/png');
+            echo file_get_contents(danupe()->path()->base().$routeData);
+        }
         exit;
     }
 }
