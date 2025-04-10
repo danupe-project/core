@@ -1,5 +1,16 @@
 <?php
 
+if (!function_exists('text')) {
+    function text(string|null $string = '')
+    {
+        if (is_null($string)) {
+            return '';
+        } else {
+            return htmlentities($string, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+    }
+}
+
 if (!function_exists('dd')) {
     function dd($data)
     {
