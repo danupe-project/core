@@ -6,6 +6,11 @@ class Danupe
 {
     private static $instances = [];
 
+    public function language()
+    {
+        return $this->getInstance(Language::class);
+    }
+
     public function view()
     {
         return $this->getInstance(View::class);
