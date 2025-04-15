@@ -74,13 +74,17 @@ class Config
     {
 
         $configData = [];
-        foreach ($this->config as $config) {
+        foreach ($this->config as $configKey => $config) {
             if (danupe()->data()->get($config, $key)) {
-                $configData[] = danupe()->data()->get($config, $key);
+                if(!$asOneDimensionalArray) {
+                    $configData[str_replace('plugin-','',$configKey)] = danupe()->data()->get($config, $key);
+                }else{
+                    $configData[] = danupe()->data()->get($config, $key);
+                }
             }
         }
 
-        if($asOneDimensionalArray){
+        if ($asOneDimensionalArray) {
             $configData = array_merge(...$configData);
         }
 
