@@ -3,6 +3,14 @@
 $routes = danupe()->route()->getAll();
 $systemMiddlewares = danupe()->config()->getAllByKey('middlewares', true);
 
+if(!sizeof($routes)) {
+    $app->get('/', function ($request, $response) {
+        echo "no routes in database";
+        exit;
+    });
+}
+
+
 foreach ($routes as $route => $handler) {
     $method = strtolower($handler['method']);
 
@@ -22,4 +30,3 @@ foreach ($routes as $route => $handler) {
 
     $routeInstance->add(Danupe\Core\Middlewares\CsrfMiddleware::class);
 }
-
