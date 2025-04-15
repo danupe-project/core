@@ -54,7 +54,7 @@ class Table
     private function buildHtml(): string
     {
 
-        if(empty($this->data)){
+        if (empty($this->data)) {
             echo danupe()->view()->render('core', 'components/alert', [
                 'type' => 'warning',
                 'title' => 'Warning',
@@ -68,7 +68,7 @@ class Table
         $html = "<div class='flex w-full overflow-x-auto'>
                 <table class='table'>";
 
-        $headers = array_keys(danupe()->data()->get($this->data,0,[]));
+        $headers = array_keys(danupe()->data()->get($this->data, 0, []));
 
         if ($this->links) {
             $headers[] = "actions";
@@ -84,14 +84,18 @@ class Table
         foreach ($this->data as $row) {
             $html .= "<tr>";
             foreach ($row as $cell) {
-                $html .= "<td>" . htmlspecialchars($cell) . "</td>";
+                if ($edit = danupe()->data()->get($this->links, 'edit')) {
+                    $html .= "<td><a href='" . danupe()->data()->get($edit, 'url') . $row[danupe()->data()->get($this->links, 'edit.key')]."' >" . htmlspecialchars($cell) . "</a></td>";
+                } else {
+                    $html .= "<td>" . htmlspecialchars($cell) . "</td>";
+                }
             }
 
             if ($this->links) {
                 $html .= "<td>";
                 foreach ($this->links as $key => $link) {
                     $url = danupe()->data()->get($link, 'url') . $row[danupe()->data()->get($link, 'key')];
-                    $html .= "<a href='" . htmlspecialchars($url) . "' title='".$key."'><i class='" . danupe()->data()->get($link, 'icon') . "'></i></a> ";
+                    $html .= "<a href='" . htmlspecialchars($url) . "' title='" . $key . "'><i class='" . danupe()->data()->get($link, 'icon') . "'></i></a> ";
                 }
                 $html .= "</td>";
             }
