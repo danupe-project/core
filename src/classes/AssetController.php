@@ -2,17 +2,14 @@
 
 namespace Danupe\Core\Classes;
 
-use Slim\Psr7\Request;
-use Slim\Psr7\Response;
-
 class AssetController
 {
 
-    public function load(Request $request, Response $response, array $arg)
+    public function load($request)
     {
 
         $routes = danupe()->route()->getAll();
-        $path = $request->getUri()->getPath();
+        $path = $request->getUri();
         $routeData = $routes[$path]['path'];
         if($routes[$path]['type']=="javascript" || $routes[$path]['type']=="js"){
             header('Content-Type: application/javascript');
