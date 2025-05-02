@@ -19,12 +19,6 @@ if (!function_exists('dd')) {
     }
 }
 
-if (!function_exists('d')) {
-    function d($data)
-    {
-        dump($data);
-    }
-}
 
 if (!function_exists('dump')) {
     function dump($data)
@@ -37,7 +31,7 @@ if (!function_exists('dump')) {
 
         if (php_sapi_name() == 'cli') {
             print_r($data);
-            #echo "Called from: " . $caller['file'] . " on line " . $caller['line'] . "\n\n";
+            echo "Called from: " . $caller['file'] . " on line " . $caller['line'] . "\n\n";
         } else {
             echo "<div style='z-index:100000; position:relative; background: #222; color: #00dd00; padding:4px; margin:4px;  font-size:13px; font-family:arial'>";
             echo "<pre style='margin:0; font-weight:bold; font-size:14px; font-family:verdana;'>";
@@ -68,4 +62,9 @@ function danupe()
     }
 
     return $danupeInstance;
+}
+
+function d()
+{
+    return danupe();
 }
