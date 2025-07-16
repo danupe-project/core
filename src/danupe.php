@@ -1,5 +1,5 @@
 <?php
-require dirname(__DIR__, 3). '/autoload.php';
+require 'autoload.php';
 session_start();
 require __DIR__.'/helper.php';
 danupe()->session()->setCsrf();
