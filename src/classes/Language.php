@@ -20,18 +20,20 @@ class Language
 
     public function get(string $key, array $replacements = []): string|false|array
     {
-
-        $explodedKey = explode('.', $key);
-        $getFirstKeyElement = danupe()->data()->get($explodedKey, 0);
-        $translationsElement = danupe()->data()->get($this->translations, $getFirstKeyElement . "." . $this->locale);
-        $keyWithoutFirstElement = array_pop($explodedKey);
-        $translation = danupe()->data()->get($translationsElement, $keyWithoutFirstElement);
-
-        foreach ($replacements as $placeholder => $value) {
-            $translation = str_replace(":$placeholder", $value, $translation);
+        // Struktur der geladenen Übersetzungen: [ pluginKey => [ locale => [ key => value ] ] ]
+        foreach ($this->translations as $pluginKey => $locales) {
+            if (!is_array($locales)) continue;
+            $entries = danupe()->data()->get($locales, $this->locale, []);
+            if (!is_array($entries)) continue;
+            if (array_key_exists($key, $entries)) {
+                $translation = $entries[$key];
+                foreach ($replacements as $placeholder => $value) {
+                    $translation = str_replace(":$placeholder", $value, $translation);
+                }
+                return $translation;
+            }
         }
-
-        return $translation;
+        return false; // Nichts gefunden
     }
 
     public function getAll(): array

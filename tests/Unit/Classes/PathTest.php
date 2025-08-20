@@ -117,9 +117,9 @@ class PathTest extends TestCase
     /** @covers Path::getAllFiles */
     public function testGetAllFilesReturnsArrayOfFiles(): void
     {
-        $testDir = danupe()->path()->plugin('core') . '/tests/files';
+        $testDir = danupe()->path()->base() . '/danupe/core/tests/files';
         if (!is_dir($testDir)) {
-            $this->markTestSkipped('Test files directory not found');
+            $this->markTestSkipped('Test files directory not found: ' . $testDir);
         }
         
         $files = Path::getAllFiles($testDir);
