@@ -20,7 +20,7 @@ if (!danupe()->data()->get($data, 'icon')) {
     }
 }
 ?>
-<div class="alert alert-<?php echo danupe()->data()->get($data, 'type'); ?> mt-4">
+<div class="alert alert-<?php echo danupe()->data()->get($data, 'type'); ?>">
     <i class="<?php echo $icon; ?> text-2xl"></i>
     <div class="flex flex-col">
         <span><?php echo danupe()->data()->get($data, 'title'); ?></span>
