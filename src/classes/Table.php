@@ -134,7 +134,7 @@ class Table
         }
         $html .= "</select>";
         // Pagination buttons
-        $html .= "<div class='table-pager flex items-center gap-1'>";
+        $html .= "<div class='table-pager flex items-center gap-1 w-full'>";
         $html .= "<button type='button' class='btn btn-xs' @click=\"goFirstPage()\" :disabled=\"getCurrentPage()==1\">&laquo;</button>";
         $html .= "<button type='button' class='btn btn-xs' @click=\"goPrevPage()\" :disabled=\"getCurrentPage()==1\">&lsaquo;</button>";
         $html .= "<span class='px-1 text-sm' x-text=\"getCurrentPage() + ' / ' + getTotalPages()\"></span>";
