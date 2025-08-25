@@ -1,19 +1,25 @@
 <?php
 
 spl_autoload_register(function ($class) {
+    static $namespaces = null;
+    static $pathCache = [];
 
-    $rootDirectory = dirname(__DIR__, 3);
+    static $rootDirectory = null;
+    if ($rootDirectory === null) {
+        $rootDirectory = dirname(__DIR__, 3);
+    }
 
-    $envFile = $rootDirectory . '/.env';
-    if (file_exists($envFile)) {
-        $envContent = file_get_contents($envFile);
-        preg_match('/DANUPE_PLUGINS="([^"]+)"/', $envContent, $matches);
+    if ($namespaces === null) {
+        $namespaces = [];
+        $envFile = $rootDirectory . '/.env';
 
-        $namespaces=[];
-        if (!empty($matches[1])) {
-            $pluginPaths = explode(',', $matches[1]);
-            foreach ($pluginPaths as $pluginPath) {
-                $namespaces[getNamespaceFromPath($pluginPath)] = $pluginPath."/src/";
+        if (file_exists($envFile)) {
+            $envContent = file_get_contents($envFile);
+            if (preg_match('/DANUPE_PLUGINS="([^"]+)"/', $envContent, $matches) && !empty($matches[1])) {
+                $pluginPaths = explode(',', $matches[1]);
+                foreach ($pluginPaths as $pluginPath) {
+                    $namespaces[getNamespaceFromPath($pluginPath)] = $pluginPath . "/src/";
+                }
             }
         }
     }
@@ -21,13 +27,42 @@ spl_autoload_register(function ($class) {
     foreach ($namespaces as $namespace => $path) {
         if (strpos($class, $namespace) === 0) {
             $relativeClass = substr($class, strlen($namespace));
-            $file = $rootDirectory . '/' . $path . str_replace('\\', '/', $relativeClass) . '.php';
+            $relativePath  = $path . str_replace('\\', '/', $relativeClass) . '.php';
+            $file          = $rootDirectory . '/' . $relativePath;
+
+            if (!isset($pathCache[$file])) {
+                $pathCache[$file] = realPathCase($rootDirectory, $relativePath);
+            }
+            $file = $pathCache[$file];
 
             if (file_exists($file)) {
-                require_once $file;
+                require $file;
                 return;
             }
         }
     }
-
 });
+
+function realPathCase($base, $relativePath)
+{
+    $parts   = explode('/', trim($relativePath, '/'));
+    $current = rtrim($base, '/');
+
+    foreach ($parts as $part) {
+        if (!is_dir($current) && !is_file($current)) {
+            $current .= '/' . $part;
+            continue;
+        }
+
+        $found = null;
+        foreach (scandir($current) as $item) {
+            if (strcasecmp($item, $part) === 0) {
+                $found = $item;
+                break;
+            }
+        }
+        $current .= '/' . ($found ?? $part);
+    }
+
+    return $current;
+}
