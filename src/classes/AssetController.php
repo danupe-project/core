@@ -8,25 +8,56 @@ class AssetController
     public function load($request)
     {
 
-        $routes = danupe()->route()->getAll();
-        $path = $request->getUri();
-        $routeData = $routes[$path]['path'];
-        if($routes[$path]['type']=="javascript" || $routes[$path]['type']=="js"){
-            header('Content-Type: application/javascript');
-            include danupe()->path()->base().$routeData;
+    $config = danupe()->config();
+    $allConfig = method_exists($config, 'all') ? $config->all() : [];
+    $assetBase = '';
+    foreach ($allConfig as $namespace => $conf) {
+        if (isset($conf['asset_path'])) {
+            $assetBase = $conf['asset_path'];
+            break;
         }
-        if($routes[$path]['type']=="css"){
-            header('Content-Type: text/css');
-            include danupe()->path()->base().$routeData;
+    }
+        $uri = $request->getUri();
+        $assetPath = ltrim(str_replace('/assets/', '', $uri), '/');
+        $file = rtrim($assetBase, '/').'/'.$assetPath;
+
+ 
+        if (!file_exists($file)) {
+            http_response_code(404);
+            echo "Asset not found";
+            exit;
         }
-        if($routes[$path]['type']=="font"){
-            header('Content-Type: font/woff2');
-            include danupe()->path()->base().$routeData;
+
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'js'   => 'application/javascript',
+            'css'  => 'text/css',
+            'png'  => 'image/png',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'svg'  => 'image/svg+xml',
+            'woff' => 'font/woff',
+            'woff2'=> 'font/woff2',
+            'ttf'  => 'font/ttf',
+            'eot'  => 'application/vnd.ms-fontobject',
+            // weitere Typen nach Bedarf
+        ];
+
+        if (isset($mimeTypes[$ext])) {
+            header('Content-Type: ' . $mimeTypes[$ext]);
+            if (in_array($ext, ['png','jpg','jpeg','gif','svg','woff','woff2','ttf','eot'])) {
+                echo file_get_contents($file);
+            } else {
+                include $file;
+            }
+            exit;
         }
-        if($routes[$path]['type']=="png"){
-            header('Content-Type: image/png');
-            echo file_get_contents(danupe()->path()->base().$routeData);
-        }
+
+        http_response_code(415);
+        echo "Unsupported asset type";
         exit;
     }
+
+
 }
