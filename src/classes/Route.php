@@ -34,22 +34,18 @@ class Route
         foreach ($this->routes as $definition) {
             if (strtolower($definition->getMethod()) === $method) {
                 $uri = strtok($uri, '?');
-                // Ensure the pattern is properly escaped and valid
-                // Zuerst optionale Platzhalter wie [/{id}] behandeln
                 $pattern = preg_replace_callback('#\[([^\[\]]+)\]#', function ($m) {
                     return '(?:' . preg_replace('#\{([^/]+)\}#', '(?<$1>[^/]+)', $m[1]) . ')?';
                 }, $definition->getPath());
-                // Dann Pflicht-Platzhalter {id} ersetzen
                 $pattern = preg_replace('#\{([^/]+)\}#', '(?<$1>[^/]+)', $pattern);
+                $pattern = str_replace('*', '.*', $pattern);
                 $pattern = "#^" . $pattern . "$#";
 
-                // Validate the generated pattern
                 if (@preg_match($pattern, '') === false) {
                     throw new \RuntimeException("Invalid regular expression: $pattern");
                 }
 
                 if (preg_match($pattern, $uri, $matches)) {
-                    // Extrahiere nur benannte Parameter
                     $params = [];
                     foreach ($matches as $key => $value) {
                         if (!is_int($key)) {
@@ -60,7 +56,6 @@ class Route
                     $handler = $definition->getHandler();
                     $middlewares = $definition->getMiddlewares();
 
-                    // Baue die Middleware-Chain
                     $middlewareChain = array_reverse($middlewares);
                     $next = function($request) use ($handler, $params) {
                         if (is_string($handler) && str_contains($handler, ':')) {
@@ -80,7 +75,6 @@ class Route
                             }
                         };
                     }
-                    // Starte die Chain
                     $next($request);
                     return;
                 }
