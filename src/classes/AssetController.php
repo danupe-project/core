@@ -7,19 +7,43 @@ class AssetController
 
     public function load($request)
     {
-
-        $config = danupe()->config();
-        $allConfig = method_exists($config, 'all') ? $config->all() : [];
+        $uri = rtrim($request->getUri(), '/') ?: '/';
+        $allConfig = danupe()->config()->all();
+        
+        $pathByUri = null;
         $assetBase = '';
+        $relativePath = '';
+
+
         foreach ($allConfig as $namespace => $conf) {
-            if (isset($conf['asset_path'])) {
-                $assetBase = $conf['asset_path'];
-                break;
+            $routes = $conf['routes'] ?? [];
+            foreach ($routes as $routeKey => $routeConfig) {
+
+                if ($routeKey === $uri) {
+                    $pathByUri = $routeConfig;
+                    $assetBase = $conf['asset_path'] ?? '';
+                    break 2;
+                }
+                
+
+                if (str_ends_with($routeKey, '*')) {
+                    $base = rtrim(substr($routeKey, 0, -1), '/');
+                    if ($uri === $base || str_starts_with($uri, $base . '/')) {
+                        $pathByUri = $routeConfig;
+                        $assetBase = $conf['asset_path'] ?? '';
+                        $relativePath = ltrim(substr($uri, strlen($base)), '/');
+                        
+
+                        if (str_contains($relativePath, '..')) {
+                            http_response_code(403);
+                            echo "Access denied";
+                            exit;
+                        }
+                        break 2;
+                    }
+                }
             }
         }
-        $routes = danupe()->route()->getAll();
-        $uri = rtrim($request->getUri(), '/') ?: '/';
-        $pathByUri = $routes[$uri] ?? null;
 
         if (!$pathByUri) {
             http_response_code(404);
@@ -36,8 +60,13 @@ class AssetController
             echo "403 Forbidden: Sie haben keine Berechtigung für dieses Asset.";
             exit;
         }
-        
-        $file = $_SERVER['DOCUMENT_ROOT']. ($pathByUri['path'] ?? null);
+
+        if ($relativePath !== '' && $assetBase !== '') {
+            $file = rtrim($assetBase, '/') . '/' . $relativePath;
+        } else {
+            $file = $_SERVER['DOCUMENT_ROOT'] . ($pathByUri['path'] ?? '');
+        }
+
         if (!$file || !file_exists($file)) {
             http_response_code(404);
             echo "Asset not found";
