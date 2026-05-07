@@ -11,14 +11,6 @@ if (!function_exists('text')) {
     }
 }
 
-if (!function_exists('dd')) {
-    function dd($data)
-    {
-        dump($data);
-        exit;
-    }
-}
-
 
 if (!function_exists('dump')) {
     function dump($data)
@@ -64,11 +56,21 @@ function danupe()
     return $danupeInstance;
 }
 
-function d()
-{
-    return danupe();
+if (!function_exists('dd')) {
+    function dd($data)
+    {
+        dump($data);
+        exit;
+    }
 }
 
+if (!function_exists('d')) {
+    function d($data)
+    {
+        print_r($data);
+        exit;
+    }
+}
 
 function getNamespaceFromPath(string $path): string
     {
