@@ -17,17 +17,32 @@ class AssetController
                 break;
             }
         }
-        $pathByUri = danupe()->route()->getAll()[$request->getUri()];
+        $routes = danupe()->route()->getAll();
+        $uri = rtrim($request->getUri(), '/') ?: '/';
+        $pathByUri = $routes[$uri] ?? null;
+
+        if (!$pathByUri) {
+            http_response_code(404);
+            echo "Asset configuration not found";
+            exit;
+        }
+
+        $allowedRoles = $pathByUri['roles'] ?? null;
+        $sessionUser = danupe()->session()->get('user');
+        $currentRole = $sessionUser['role'] ?? 'guest';
+
+        if (!danupe()->plugin('user', 'role')->isAllowed($currentRole, $allowedRoles)) {
+            http_response_code(403);
+            echo "403 Forbidden: Sie haben keine Berechtigung für dieses Asset.";
+            exit;
+        }
         
         $file = $_SERVER['DOCUMENT_ROOT']. ($pathByUri['path'] ?? null);
-
-
-        if (!file_exists($file)) {
+        if (!$file || !file_exists($file)) {
             http_response_code(404);
             echo "Asset not found";
             exit;
         }
-
 
         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
         $mimeTypes = [
