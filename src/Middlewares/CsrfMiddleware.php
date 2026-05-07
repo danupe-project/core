@@ -15,7 +15,7 @@ class CsrfMiddleware
             $csrfToken = $parsedBody['csrf_token'] ?? '';
 
             // Zugriff auf die Session-Daten (Session muss vorher gesetzt werden)
-            $sessionToken = d()->session()->get('csrf_token', null);
+            $sessionToken = danupe()->session()->get('csrf_token', null);
 
             // CSRF-Token prüfen
             if (empty($csrfToken) || $csrfToken !== $sessionToken) {
@@ -32,10 +32,10 @@ class CsrfMiddleware
         }
 
         // Falls noch kein Token generiert wurde, generieren wir einen
-        $csrfToken = d()->session()->get('csrf_token');
+        $csrfToken = danupe()->session()->get('csrf_token');
         if (empty($csrfToken)) {
             $csrfToken = bin2hex(random_bytes(32));
-            d()->session()->set('csrf_token', $csrfToken);
+            danupe()->session()->set('csrf_token', $csrfToken);
         }
 
         // Token im Request mitgeben für spätere Verwendung (z. B. in Views)
