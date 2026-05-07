@@ -8,25 +8,26 @@ class AssetController
     public function load($request)
     {
 
-    $config = danupe()->config();
-    $allConfig = method_exists($config, 'all') ? $config->all() : [];
-    $assetBase = '';
-    foreach ($allConfig as $namespace => $conf) {
-        if (isset($conf['asset_path'])) {
-            $assetBase = $conf['asset_path'];
-            break;
+        $config = danupe()->config();
+        $allConfig = method_exists($config, 'all') ? $config->all() : [];
+        $assetBase = '';
+        foreach ($allConfig as $namespace => $conf) {
+            if (isset($conf['asset_path'])) {
+                $assetBase = $conf['asset_path'];
+                break;
+            }
         }
-    }
-        $uri = $request->getUri();
-        $assetPath = ltrim(str_replace('/assets/', '', $uri), '/');
-        $file = rtrim($assetBase, '/').'/'.$assetPath;
+        $pathByUri = danupe()->route()->getAll()[$request->getUri()];
+        
+        $file = $_SERVER['DOCUMENT_ROOT']. ($pathByUri['path'] ?? null);
 
- 
+
         if (!file_exists($file)) {
             http_response_code(404);
             echo "Asset not found";
             exit;
         }
+
 
         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
         $mimeTypes = [
