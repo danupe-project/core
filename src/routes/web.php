@@ -20,13 +20,10 @@ if (!sizeof($routes)) {
         $parsedRoute = preg_replace('/\/\d+/', '/{id}', $route);  // Ersetze IDs durch {id} Platzhalter
         $parsedRoute = preg_replace('/\/\{id\}$/', '[/{id}]', $parsedRoute);  // Spezifische Behandlung für Routen mit {id}
 
-        // Füge die Route hinzu
         $routeInstance = $router->$method($parsedRoute, danupe()->data()->get($handler, 'controller') . ':' . danupe()->data()->get($handler, 'action'));
 
 
-        // Hole die Middlewares aus der Konfiguration der Route
         $middlewares = danupe()->data()->get($handler, 'middlewares') ?? [];
-        // Füge jede Middleware hinzu
         if (!empty($middlewares)) {
             foreach ($middlewares as $middlewareClass) {
                 $middlewareClass = danupe()->data()->get($systemMiddlewares, $middlewareClass);
@@ -36,12 +33,11 @@ if (!sizeof($routes)) {
             }
         }
 
-        // Füge CSRF Middleware hinzu
+
         $routeInstance->add(CsrfMiddleware::class);
     }
 }
 
-// Dispatch der Anfrage
-if (php_sapi_name() !== 'cli') {
+if (isset($_SERVER['HTTP_HOST']) && !defined('DANUPE_CONSOLE')) {
     $router->dispatch($request);
 }
