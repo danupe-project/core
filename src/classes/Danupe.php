@@ -61,6 +61,11 @@ class Danupe
         return $this->getInstance(Helper::class);
     }
 
+    public function cache()
+    {
+        return $this->getInstance(Cache::class);
+    }
+
     public function route()
     {
         return $this->getInstance(Route::class);
