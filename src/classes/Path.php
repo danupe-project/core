@@ -19,12 +19,15 @@ class Path
         return self::findProjectRoot();
     }
 
-    public static function plugin(string $pluginName)
+    public static function plugin(string $pluginName, $fullPath = false)
     {
         foreach (danupe()->env()->getArray('DANUPE_PLUGINS') as $plugin) {
             $pluginNameFromArray = explode('/', $plugin);
             $pluginNameFromArray = $pluginNameFromArray[count($pluginNameFromArray) - 1] ?? null;
             if ($pluginName === $pluginNameFromArray) {
+                if($fullPath) {
+                    return self::findProjectRoot() . $plugin;
+                }
                 return $plugin;
             }
         }
