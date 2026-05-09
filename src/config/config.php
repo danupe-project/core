@@ -5,6 +5,7 @@ return [
     'meta' => [
         'title' => 'Danupe | Great CMS',
         'description' => 'Danupe is a great CMS for developers',
-        'keywords' => 'cms, danupe, php, laravel, symfony, wordpress, drupal, joomla'
+        'keywords' => 'cms, danupe, php, laravel, symfony, wordpress, drupal, joomla',
+        'version' => '0.1.0',
     ],
 ];
