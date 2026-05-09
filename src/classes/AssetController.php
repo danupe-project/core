@@ -69,7 +69,7 @@ class AssetController
 
         if (!$file || !file_exists($file)) {
             http_response_code(404);
-            echo "Asset not found";
+            echo "Asset not found: " . htmlspecialchars($file);
             exit;
         }
 
