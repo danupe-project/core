@@ -85,9 +85,17 @@ class Table
             $html .= "<tr>";
             foreach ($row as $cell) {
                 if ($edit = danupe()->data()->get($this->links, 'edit')) {
-                    $html .= "<td><a href='" . danupe()->data()->get($edit, 'url') . $row[danupe()->data()->get($this->links, 'edit.key')]."' >" . htmlspecialchars($cell) . "</a></td>";
-                } else {
-                    $html .= "<td>" . htmlspecialchars($cell) . "</td>";
+                    $url = danupe()->data()->get($edit, 'url') . $row[danupe()->data()->get($this->links, 'edit.key')];
+                    $html .= "<td><a href='" . $url . "'>" . htmlspecialchars((string)$cell) . "</a></td>";
+                } 
+                else {
+                    if (is_array($cell) || is_object($cell)) {
+                        $tempArray = (array)$cell;
+                        $displayValue = implode(', ', array_map('htmlspecialchars', $tempArray));
+                    } else {
+                        $displayValue = htmlspecialchars((string)$cell);
+                    }
+                    $html .= "<td>" . $displayValue . "</td>";
                 }
             }
 
@@ -126,7 +134,7 @@ class Table
         // Controls (search, page size, pagination, status)
         $html .= "<div class='table-controls flex flex-wrap gap-2 items-center mb-2'>";
         // Search
-    $html .= "<input type='text' class='table-search input' placeholder='" . htmlspecialchars($searchPlaceholder) . "' x-model=\"params.search\" @input.debounce.500ms=\"typeof doSearch==='function' && doSearch()\" />";
+        $html .= "<input type='text' class='table-search input' placeholder='" . htmlspecialchars($searchPlaceholder) . "' x-model=\"params.search\" @input.debounce.500ms=\"typeof doSearch==='function' && doSearch()\" />";
         // Page size
         $html .= "<select class='table-limit select' x-model=\"params.limit\" @change=\"setLimit()\">";
         foreach ($pageSizeOptions as $opt) {
