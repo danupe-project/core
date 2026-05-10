@@ -4,13 +4,26 @@ namespace Danupe\Core\Classes;
 
 class Table
 {
-
     public array $options = [];
     public string $url = "";
     public bool $ajax = false;
     public array $data = [];
-
     public array $links = [];
+    /**
+     * NEU: Definition der Spalten
+     * Struktur: 'key' => [
+     * 'label' => 'Header', 
+     * 'formatter' => function($val, $row) { return ... }, 
+     * 'template' => '<span>...</span>' (Alpine.js HTML)
+     * ]
+     */
+    public array $columns = [];
+
+    public function setColumns(array $columns): self
+    {
+        $this->columns = $columns;
+        return $this;
+    }
 
     public function setLinks(array $links): self
     {
@@ -44,70 +57,64 @@ class Table
 
     public function render(): string
     {
-        if ($this->ajax) {
-            return $this->buildAjax();
-        } else {
-            return $this->buildHtml();
-        }
+        return $this->ajax ? $this->buildAjax() : $this->buildHtml();
     }
 
     private function buildHtml(): string
     {
-
         if (empty($this->data)) {
-            echo danupe()->view()->render('core', 'components/alert', [
+            return danupe()->view()->render('core', 'components/alert', [
                 'type' => 'warning',
-                'title' => 'Warning',
-                'text' => 'no data found',
+                'title' => 'Hinweis',
+                'text' => 'Keine Daten gefunden',
             ]);
-            exit;
         }
 
+        // Header ermitteln (entweder aus columns oder aus den Daten-Keys)
+        $headers = !empty($this->columns) ? array_column($this->columns, 'label') : array_keys($this->data[0]);
+        if ($this->links)
+            $headers[] = "Aktionen";
 
+        $html = "<div class='flex w-full overflow-x-auto'><table class='table'>";
 
-        $html = "<div class='flex w-full overflow-x-auto'>
-                <table class='table'>";
-
-        $headers = array_keys(danupe()->data()->get($this->data, 0, []));
-
-        if ($this->links) {
-            $headers[] = "actions";
-        }
-
-
+        // Header Zeile
         $html .= "<tr>";
         foreach ($headers as $header) {
             $html .= "<th>" . htmlspecialchars($header) . "</th>";
         }
         $html .= "</tr>";
 
+        // Daten Zeilen
         foreach ($this->data as $row) {
             $html .= "<tr>";
-            foreach ($row as $cell) {
-                if ($edit = danupe()->data()->get($this->links, 'edit')) {
-                    $url = danupe()->data()->get($edit, 'url') . $row[danupe()->data()->get($this->links, 'edit.key')];
-                    $html .= "<td><a href='" . $url . "'>" . htmlspecialchars((string)$cell) . "</a></td>";
-                } 
-                else {
-                    if (is_array($cell) || is_object($cell)) {
-                        $tempArray = (array)$cell;
-                        $displayValue = implode(', ', array_map('htmlspecialchars', $tempArray));
+
+            if (!empty($this->columns)) {
+                foreach ($this->columns as $key => $col) {
+                    $value = $row[$key] ?? '';
+                    // Falls ein Formatter existiert, nutze ihn, sonst Text-Ausgabe
+                    if (isset($col['formatter']) && is_callable($col['formatter'])) {
+                        $displayValue = $col['formatter']($value, $row);
                     } else {
-                        $displayValue = htmlspecialchars((string)$cell);
+                        $displayValue = htmlspecialchars((string) $value);
                     }
-                    $html .= "<td>" . $displayValue . "</td>";
+                    $html .= "<td>$displayValue</td>";
+                }
+            } else {
+                // Fallback: Alle Felder aus dem Row-Array
+                foreach ($row as $cell) {
+                    $html .= "<td>" . htmlspecialchars((string) $cell) . "</td>";
                 }
             }
 
+            // Links/Aktionen
             if ($this->links) {
                 $html .= "<td>";
                 foreach ($this->links as $key => $link) {
                     $url = danupe()->data()->get($link, 'url') . $row[danupe()->data()->get($link, 'key')];
-                    $html .= "<a href='" . htmlspecialchars($url) . "' title='" . $key . "'><i class='" . danupe()->data()->get($link, 'icon') . "'></i></a> ";
+                    $html .= "<a href='" . htmlspecialchars($url) . "' title='" . $key . "' style='margin-right:8px;'><i class='" . danupe()->data()->get($link, 'icon') . "'></i></a> ";
                 }
                 $html .= "</td>";
             }
-
             $html .= "</tr>";
         }
 
@@ -117,80 +124,80 @@ class Table
 
     private function buildAjax(): string
     {
-        // Guard: ensure we have at least one row to derive headers, otherwise use provided option headers
-        $headers = [];
-        if (!empty($this->data)) {
-            $headers = array_keys($this->data[0]);
-        } elseif (!empty($this->options['headers']) && is_array($this->options['headers'])) {
-            $headers = $this->options['headers'];
+        // Spalten-Keys für das Template-Loop
+        $keys = !empty($this->columns) ? array_keys($this->columns) : [];
+        if (empty($keys) && !empty($this->data)) {
+            $keys = array_keys($this->data[0]);
         }
 
-        $pageSizeOptions = $this->options['page_sizes'] ?? [10,25,50,100];
+        $pageSizeOptions = $this->options['page_sizes'] ?? [10, 25, 50, 100];
         $searchPlaceholder = $this->options['search_placeholder'] ?? 'Suche...';
         $noDataText = $this->options['no_data'] ?? 'Keine Daten';
 
         $html = "<div x-data=\"littleBIGtable({url: '/" . $this->url . "'})\" x-init=\"init()\">";
 
-        // Controls (search, page size, pagination, status)
-        $html .= "<div class='table-controls flex flex-wrap gap-2 items-center mb-2'>";
-        // Search
-        $html .= "<input type='text' class='table-search input' placeholder='" . htmlspecialchars($searchPlaceholder) . "' x-model=\"params.search\" @input.debounce.500ms=\"typeof doSearch==='function' && doSearch()\" />";
-        // Page size
-        $html .= "<select class='table-limit select' x-model=\"params.limit\" @change=\"setLimit()\">";
+        // Controls
+        $html .= "<div class='table-controls flex flex-wrap gap-2 items-center mb-4'>";
+        $html .= "<input type='text' class='input' style='max-width:250px' placeholder='" . htmlspecialchars($searchPlaceholder) . "' x-model=\"params.search\" @input.debounce.500ms=\"doSearch()\" />";
+        $html .= "<select class='select' style='width:auto' x-model=\"params.limit\" @change=\"setLimit()\">";
         foreach ($pageSizeOptions as $opt) {
-            $html .= "<option value='" . (int)$opt . "'>" . (int)$opt . "</option>";
+            $html .= "<option value='$opt'>$opt</option>";
         }
         $html .= "</select>";
-        // Pagination buttons
-        $html .= "<div class='table-pager flex items-center gap-1 w-full'>";
-        $html .= "<button type='button' class='btn btn-xs' @click=\"goFirstPage()\" :disabled=\"getCurrentPage()==1\">&laquo;</button>";
-        $html .= "<button type='button' class='btn btn-xs' @click=\"goPrevPage()\" :disabled=\"getCurrentPage()==1\">&lsaquo;</button>";
-        $html .= "<span class='px-1 text-sm' x-text=\"getCurrentPage() + ' / ' + getTotalPages()\"></span>";
-        $html .= "<button type='button' class='btn btn-xs' @click=\"goNextPage()\" :disabled=\"getCurrentPage()==getTotalPages()\">&rsaquo;</button>";
-        $html .= "<button type='button' class='btn btn-xs' @click=\"goLastPage()\" :disabled=\"getCurrentPage()==getTotalPages()\">&raquo;</button>";
-        $html .= "</div>"; // pager
-        // Status summary
-        $html .= "<div class='table-status text-xs' x-html=\"meta.status\"></div>";
-        $html .= "</div>"; // controls
+        $html .= "<div class='flex items-center gap-2 ml-auto'>";
+        $html .= "<button type='button' class='btn btn-xs' @click=\"goPrevPage()\" :disabled=\"params.offset == 0\">&lsaquo;</button>";
+        $html .= "<span class='text-sm' x-text=\"Math.floor(params.offset/params.limit)+1\"></span>";
+        $html .= "<button type='button' class='btn btn-xs' @click=\"goNextPage()\" :disabled=\"rows.length < params.limit\">&rsaquo;</button>";
+        $html .= "</div>";
+        $html .= "</div>";
 
-        // Table structure
         $html .= "<div class='flex w-full overflow-x-auto'><table class='table'>";
-        if ($headers) {
-            $html .= "<thead><tr>";
-            foreach ($headers as $header) {
-                $safe = htmlspecialchars($header);
-                $html .= "<th class='cursor-pointer select-none' @click=\"doSort('$safe')\">$safe <span x-html=\"getSortIcon('$safe')\"></span></th>";
-            }
-            if ($this->links) {
-                $html .= "<th>actions</th>";
-            }
-            $html .= "</tr></thead>";
+
+        // Header
+        $html .= "<thead><tr>";
+        foreach ($keys as $key) {
+            $label = $this->columns[$key]['label'] ?? $key;
+            $html .= "<th class='cursor-pointer select-none' @click=\"doSort('$key')\">" . htmlspecialchars($label) . " <span x-html=\"getSortIcon('$key')\"></span></th>";
         }
+        if ($this->links)
+            $html .= "<th>Aktionen</th>";
+        $html .= "</tr></thead>";
+
+        // Body mit Alpine Template
         $html .= "<tbody>";
-    $emptyColspan = count($headers) + ($this->links ? 1 : 0);
-    $html .= "<template x-if=\"!rows.length && !meta.loading\"><tr><td colspan='" . max(1,$emptyColspan) . "' class='text-center text-sm italic'>" . htmlspecialchars($noDataText) . "</td></tr></template>";
-        if ($headers) {
-            $html .= "<template x-for=\"row in rows\" :key=\"row.id ? row.id : JSON.stringify(row)\"><tr>";
-            foreach ($headers as $key) {
-                $safeKey = htmlspecialchars($key);
-                $html .= "<td x-text=\"row.$safeKey\"></td>";
+        $html .= "<template x-if=\"!rows.length && !meta.loading\"><tr><td colspan='20' class='text-center italic'>" . htmlspecialchars($noDataText) . "</td></tr></template>";
+        $html .= "<template x-for=\"row in rows\" :key=\"row.id\">";
+        $html .= "<tr>";
+
+        foreach ($keys as $key) {
+            if (isset($this->columns[$key]['template'])) {
+                $template = $this->columns[$key]['template'];
+                // Wir nutzen hier ' für das Attribut, damit " im Template erlaubt ist
+                $html .= "<td x-html='" . $template . "'></td>";
+            } else {
+                $html .= "<td x-text=\"row.$key\"></td>";
             }
-            if ($this->links) {
-                $html .= "<td>";
-                foreach ($this->links as $linkKey => $link) {
-                    $icon = htmlspecialchars(danupe()->data()->get($link,'icon','fas fa-edit'));
-                    $urlBase = htmlspecialchars(danupe()->data()->get($link,'url',''));
-                    $rowKey = htmlspecialchars(danupe()->data()->get($link,'key','id'));
-                    // Alpine expression builds full url per row
-                    $html .= "<a class='inline-block px-1 text-primary hover:underline' :href=\"'$urlBase' + row.$rowKey\" title='" . htmlspecialchars($linkKey) . "'><i class='$icon'></i></a> ";
-                }
-                $html .= "</td>";
-            }
-            $html .= "</tr></template>";
         }
+
+        // Aktionen (Links)
+        if ($this->links) {
+            $html .= "<td>";
+            foreach ($this->links as $linkKey => $link) {
+                $icon = htmlspecialchars(danupe()->data()->get($link, 'icon', 'fas fa-edit'));
+                $urlBase = htmlspecialchars(danupe()->data()->get($link, 'url', ''));
+                $rowKey = htmlspecialchars(danupe()->data()->get($link, 'key', 'id'));
+                $html .= "<a class='px-1 text-primary' :href=\"'$urlBase' + row.$rowKey\" title='" . htmlspecialchars($linkKey) . "'><i class='$icon'></i></a> ";
+            }
+            $html .= "</td>";
+        }
+
+        $html .= "</tr>";
+        $html .= "</template>";
         $html .= "</tbody>";
+
         $html .= "</table></div>";
-        $html .= "</div>"; // x-data root
+        $html .= "</div>";
+
         return $html;
     }
 }
