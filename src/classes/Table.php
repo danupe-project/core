@@ -71,18 +71,27 @@ class Table
         }
 
         // Header ermitteln (entweder aus columns oder aus den Daten-Keys)
-        $headers = !empty($this->columns) ? array_column($this->columns, 'label') : array_keys($this->data[0]);
-        if ($this->links)
+        $headers = [];
+        if (!empty($this->columns)) {
+            $headers = array_column($this->columns, 'label');
+        } elseif (isset($this->data[0]) && is_array($this->data[0])) {
+            $headers = array_keys($this->data[0]);
+        }
+
+        if ($this->links) {
             $headers[] = "Aktionen";
+        }
 
         $html = "<div class='flex w-full overflow-x-auto'><table class='table'>";
 
         // Header Zeile
-        $html .= "<tr>";
-        foreach ($headers as $header) {
-            $html .= "<th>" . htmlspecialchars($header) . "</th>";
+        if (!empty($headers)) {
+            $html .= "<tr>";
+            foreach ($headers as $header) {
+                $html .= "<th>" . htmlspecialchars($header) . "</th>";
+            }
+            $html .= "</tr>";
         }
-        $html .= "</tr>";
 
         // Daten Zeilen
         foreach ($this->data as $row) {
@@ -102,7 +111,10 @@ class Table
             } else {
                 // Fallback: Alle Felder aus dem Row-Array
                 foreach ($row as $cell) {
-                    $html .= "<td>" . htmlspecialchars((string) $cell) . "</td>";
+                    $value = is_array($cell) || is_object($cell)
+                        ? json_encode($cell, JSON_UNESCAPED_UNICODE)
+                        : (string) $cell;
+                    $html .= "<td>" . htmlspecialchars($value) . "</td>";
                 }
             }
 
